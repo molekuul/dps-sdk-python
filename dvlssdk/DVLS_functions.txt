@@ -1,0 +1,218 @@
+DVLSConnection (**options)
+	Use this class and its methods to interact with a DVLS server
+	-options; ex: specify log='ERROR' so that only errors will be output to the console, omit log to output everything
+
+Login (ServerURI, UserName, Password, **options)
+	Login to the DVLS server
+	-ServerURI; address of the DVLS server - ex: http://127.0.0.1/dvls
+	-UserName; user name of the user to log in
+	-Password; password of the user to log in
+	-RepositoryID; 
+
+	returns the result code returned by the REST API
+
+Logout (UserName)
+	Logout of the DVLS server
+	-Username; user name of the user to log out
+
+	returns the result code returned by the REST API
+
+CreateNewUser (UserName, Password, **options)
+	Create a new user of the DVLS server.  This function will check if the user already exists, in which case it will abort creation.
+	-Username; user name of the user to create
+	-Password; password of the user to create
+	-**options; 
+		type='domain' for domain users.  Does not need the password, so set it to None
+		type='database' for database users. Needs a password.
+		omit type for Devolutions(custom) user. Needs a password.
+		isAdmin - user is an Admin or not - True or False
+		isEnabled - user is active or not - True or False
+		changePW_NextLogon - force user to change his password next time he logs in - True or False
+		email - email address of the user
+		firstName - first name of the user
+		lastName - last name of the user
+		companyName - company name of the user
+		jobTitle - job title of the user
+		department - department of the user
+		gravatarEmail - gravatar email of the user
+		address - address of the user
+		state - state name where the user lives
+		countryCode - country code of the country where the user lives (ex: 'CA', 'US', 'DE')
+		phone - phone number of the user
+		workPhone - work phone number of the user
+		cellPhone - cell phone number of the user
+		fax - fax phone number of the user
+		roles - list of roles that the user can be affected - depends on the current roles defined
+		access - list of application permissions of the user ('RDM', 'PVM', 'DWL', 'WEB') - specifying one will set it to true, whereas omitting it will set it to false
+		privileges - list of privileges of the user ('revealPW', 'dragDrop', 'viewDetails', 'viewInfos', 'viewUsageLogs', 'import', 'export') - specifying one will set it to true, whereas omitting it will set it to false
+		settings - list of settings of the user, Offline Mode only for now ('Disabled', 'ReadOnly', 'ReadWrite')
+
+	returns the result code returned by the REST API
+
+ModifyUser (UserName, **options)
+	Modify an existing user.
+	-Username; user name of the user to modify
+	-**options; 
+		isAdmin - user is an Admin or not - True or False
+		isEnabled - user is active or not - True or False
+		changePW_NextLogon - force user to change his password next time he logs in - True or False
+		email - email address of the user
+		firstName - first name of the user
+		lastName - last name of the user
+		companyName - company name of the user
+		jobTitle - job title of the user
+		department - department of the user
+		gravatarEmail - gravatar email of the user
+		address - address of the user
+		state - state name where the user lives
+		countryCode - country code of the country where the user lives (ex: 'CA', 'US', 'DE')
+		phone - phone number of the user
+		workPhone - work phone number of the user
+		cellPhone - cell phone number of the user
+		fax - fax phone number of the user
+		roles - list of roles that the user can be affected - depends on the current roles defined
+		access - list of application permissions of the user ('RDM', 'PVM', 'DWL', 'WEB') - specifying one will set it to true, whereas omitting it will set it to false
+		privileges - list of privileges of the user ('revealPW', 'dragDrop', 'viewDetails', 'viewInfos', 'viewUsageLogs', 'import', 'export') - specifying one will set it to true, whereas omitting it will set it to false
+		settings - list of settings of the user, Offline Mode only for now ('Disabled', 'ReadOnly', 'ReadWrite')
+
+	returns the result code returned by the REST API
+
+GetUserInfos (UserName)
+	Retrieve a users' informations
+	
+	returns the users' tree of information
+		
+GetUsers ()
+	Retrieve the tree of users of the DVLS server
+	
+	returns the tree of users of the DVLS server
+
+GetUserKey (UserName)
+	Retrieve the unique key of a specific DVLS user from a list of DVLS users
+	UserName; user name of the user to query
+
+	returns the key of a user
+
+DeleteUser (UserName)
+	Deletes a user of the DVLS server using a user's unique key
+	UserName; user name of the user to query
+
+	returns the result code returned by the REST API
+
+CreateEntry (EntryType, Name, **options)
+	Creates an entry for the logged in user
+	-EntryType; type of the entry (ex: 'Group', 'RDP', etc)
+	-Name; name of the entry (ex: 'HR Department', 'HR Database', etc)
+	-**options; for 'Contact' and 'DataEntry' entryTypes, specify.....
+
+	returns the result code returned by the REST API
+
+GetEntries ()
+	Retrieve the entries of the logged in user
+
+	returns the tree of entries
+
+GetEntryID (entryName)
+	Retrieve the unique ID of a specific entry
+	-entryName; name of the entry to query
+
+	returns the id of the specified entryName	
+
+DeleteEntry (entryType, entryName)
+	Deletes an entry for the logged in user
+	-entryType; type of the entry to delete (ex: 'Group')
+	-entryName; name of the entry to delete
+
+	returns the result code returned by the REST API
+
+CreateRepository ()
+	Create a new repository
+	
+	returns the result code returned by the REST API
+	
+GetRepositories ()
+	Retrieve the repository entities of the logged in user
+
+	returns the tree of available repositories
+
+GetRepositoryID (name)
+	Retrieve the ID of a specific repository
+	
+	returns the ID of the specified repository
+	
+CreateRole (name)
+	Create a new role
+	- name; name of the new role
+	
+	returns the result code returned by the REST API
+	
+GetRoles ()
+	Retrieve the list of roles
+	
+	returns the tree of available roles
+	
+GetRoleId (name)
+	Retrieve the ID of a specific role
+	- name; name of the role to retrieve the ID
+	
+	returns the Id of the specified role
+	
+ModifyRole (name, **options)
+	Modify an existing role
+	- name; name of the role to modify
+	- **options;
+		isAdmin; administrator role or not - True or False.
+		description; description of the role
+
+	returns the result code returned by the REST API
+		
+DeleteRole (name)
+	Delete an existing role
+	- name; name of the role to delete
+	
+	returns the result code returned by the REST API
+
+CreateSecurityGroup (name, desc)
+	Create a new security group
+	- name; name of the security group to create
+	- desc; (optional) description of the security group to create
+
+	returns the result code returned by the REST API
+
+ModifySecurityGroup (name, newName, **options)
+	Modify a specific security group
+	- name; name of the security group to modify
+	- newName; new name of the security group
+	- **options;
+		desc; new description of the security group
+
+	returns the result code returned by the REST API
+
+DeleteSecurityGroup (name)
+	Delete a specific security group
+	- name; name of the security group to delete
+
+	returns the result code returned by the REST API
+
+GetSecurityGroupID (name)
+	Retrieve the ID of a specific security group
+	- name; name of the security group to retrieve the ID
+
+	returns the ID of the specified security group
+
+GetSecurityGroupTree ()
+	Retrieve the tree of security security groups
+
+	returns the tree of security security groups
+	
+ModifyFeatures (**options)
+	Modify the features.
+	
+	-**options;
+		allowBrowserExtension
+	        allowWebAddSessions 
+        	allowWebEditEntries 
+	        allowWebPrivateVault 
+        	apiHelpPageEnabled 
+
+	returns the result code returned by the REST API
