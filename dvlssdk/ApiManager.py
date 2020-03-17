@@ -85,8 +85,8 @@ class ApiManager(object):
         web_request = self._do_api_get(self.url_resolver.server_info_url())
         return SDKResult(web_request.json())
 
-    def get_active_repository_entries(self, verbose_override=None):
-        web_request = self._do_api_post_json(self.url_resolver.entries_tree_url(), '')
+    def get_active_repository_entries(self, repository_id, verbose_override=None):
+        web_request = self._do_api_get(self.url_resolver.entries_tree_url(repository_id))
         return SDKResult(web_request.json())
 
     def get_users(self, verbose_override=None):

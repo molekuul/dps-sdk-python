@@ -16,7 +16,7 @@ from dvlssdk.generated.enums.PasswordGeneratorMode import PasswordGeneratorMode
 # Constants
 # DVLS_DB_Zip = "./../tests/EntryList.zip"
 # DVLS_URI = 'http://127.0.0.1/dvlsSDK'
-DVLS_URI = 'http://127.0.0.1/dvls'
+DVLS_URI = 'http://127.0.0.1/dpsDatabaseDLL'
 DVLS = DVLSConnection(DVLS_URI, errorLevelLog='INFO')
 DVLS_ADMIN_USER = 'mainuser'
 DVLS_ADMIN_PW = '123456'
@@ -29,14 +29,9 @@ DVLS_EXISTING_DOMAIN_USERS = ['ted@windjammer.loc',
                               'burton.guido@downhillpros.com']
 # To test logging in using a wrong domain
 DVLS_NON_EXISTING_DOMAIN_USER = 'AJUZUZ\\ted'
-DVLS_EXISTING_DB_USERS = ['DB_Bill',
-                          'DB_Ted']
-DVLS_EXISTING_DB_USERS_PW = '123456'
-DVLS_NEW_DB_USER = 'DB_User_12345'
 DVLS_NEW_CUSTOM_USERS = ['_Bill',
                          '_Ted']
 DVLS_NEW_CUSTOM_USERS_PW = '123456'
-DVLS_NEW_DB_USER_PW = '123456'
 DVLS_WRONG_PW = '654321'
 
 DVLS_NEW_ROLES = ['SA',
@@ -63,7 +58,6 @@ NO_DISPLAY = False
 TIME_CURRENT = str(datetime.datetime.now().hour) + ':' + str(datetime.datetime.now().minute)
 TIME_IN_ONE_HOUR = str(datetime.datetime.now().hour + 1) + ':' + str(datetime.datetime.now().minute)
 TOMORROW = str(datetime.datetime.now() + datetime.timedelta(1))
-
 
 def _set_logger(logger, log_level):
     try:
@@ -108,34 +102,32 @@ def run_cleanup():
         DVLS.delete_user_by_name(user, NO_DISPLAY)
     for user in DVLS_EXISTING_DOMAIN_USERS:
         DVLS.delete_user_by_name(user, NO_DISPLAY)
-    for user in DVLS_EXISTING_DB_USERS:
-        DVLS.delete_user_by_name(user, NO_DISPLAY)
 
     DVLS.dvls_logger.info("# Delete entries #", NO_DISPLAY)
 
-    delete_entries(DVLS.get_connections_by_name("SSH Tunnel Entry"))
-    delete_entries(DVLS.get_connections_by_name("Credential Entry"))
-    delete_entries(DVLS.get_connections_by_name("Command Line Entry"))
-    delete_entries(DVLS.get_connections_by_name("RDP Configured Entry"))
-    delete_entries(DVLS.get_connections_by_name("SSH Shell Entry"))
-    delete_entries(DVLS.get_connections_by_name("Default Repository - Private Key Entry"))
-    delete_entries(DVLS.get_connections_by_name("Group Entry"))
-    delete_entries(DVLS.get_connections_by_name("Group Entry 2"))
+    delete_entries(DVLS.get_connections_by_name("SSH Tunnel Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("Credential Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("Command Line Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("RDP Configured Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("SSH Shell Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("Default Repository - Private Key Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("Group Entry", DEFAULT_REPO_ID, NO_DISPLAY))
+    delete_entries(DVLS.get_connections_by_name("Group Entry 2", DEFAULT_REPO_ID, NO_DISPLAY))
 
-    result = DVLS.get_private_vault_entries_by_name("Private Vault - Private Key Entry")
+    result = DVLS.get_private_vault_entries_by_name("Private Vault - Private Key Entry", NO_DISPLAY)
     if result.success:
         entries = result.data
         if entries.__len__() > 0:
             DVLS.delete_private_vault_entry_by_id(entries[0]['id'], NO_DISPLAY)
 
-    result = DVLS.get_password_templates()
+    result = DVLS.get_password_templates(NO_DISPLAY)
     if result.success:
         templates = result.data
         for template in templates:
-            DVLS.delete_password_template_by_id(template.get('id'))
+            DVLS.delete_password_template_by_id(template.get('id'), NO_DISPLAY)
 
     for repo in DVLS_NEW_REPOSITORIES:
-         DVLS.delete_repository_by_name(repo)
+         DVLS.delete_repository_by_name(repo, NO_DISPLAY)
 
 
 TestLogger.info("---------------------------------------------------------------------------------------------\n")
@@ -144,11 +136,13 @@ TestLogger.info("           ### CRITICAL TESTS ###")
 TestLogger.info("           ######################")
 TestLogger.info(" ")
 DVLS.login(DVLS_ADMIN_USER, DVLS_ADMIN_PW)
-users_result = DVLS.get_users(False)
+users_result = DVLS.get_users(NO_DISPLAY)
 users = 1
 if users_result.success:
     users = len(users_result.data)
 DVLSTest = ApiTesting.ApiTesting(DVLS, TestLogger, users)
+
+DEFAULT_REPO_ID = DVLS.get_repository_id("Default", NO_DISPLAY).data
 
 run_cleanup()
 
@@ -169,12 +163,12 @@ TestLogger.info("           # Create Users #")
 TestLogger.info("           ----------------------------------------")
 
 role_RH_id = ''
-role_RH_result = DVLS.get_role_id('RH')
+role_RH_result = DVLS.get_role_id('RH', NO_DISPLAY)
 if role_RH_result.success:
     role_RH_id = role_RH_result.data
 
 role_SA_id = ''
-role_SA_result = DVLS.get_role_id('SA')
+role_SA_result = DVLS.get_role_id('SA', NO_DISPLAY)
 if role_SA_result.success:
     role_SA_id = role_SA_result.data
 
@@ -224,77 +218,17 @@ for user in DVLS_EXISTING_DOMAIN_USERS:
                 CanViewInformations=False,
                 OfflineMode='ReadOnly')
 
-# Create database (DVLS) user which already exist in the database - password specified
-eMail = 'new' + ''.join(random.SystemRandom().choice(string.digits)
-                        for _ in range(5)) + '@sql.com'
-
 sec_group0 = 0
-sec_group_result = DVLS.get_security_group_id(DVLS_SEC_GROUPS[0])
+sec_group_result = DVLS.get_security_group_id(DVLS_SEC_GROUPS[0], NO_DISPLAY)
 if sec_group_result.success:
     sec_group0 = sec_group_result.data
 
 sec_group1 = 0
-sec_group_result = DVLS.get_security_group_id(DVLS_SEC_GROUPS[1])
+sec_group_result = DVLS.get_security_group_id(DVLS_SEC_GROUPS[1], NO_DISPLAY)
 if sec_group_result.success:
     sec_group1 = sec_group_result.data
 
-DVLSTest.create_user_test(
-                DVLS_EXISTING_DB_USERS[0],
-                'SqlServer',
-                DVLS_EXISTING_DB_USERS_PW,
-                AllowDragAndDrop=False,
-                AllowRevealPassword=False,
-                CanExport=False,
-                CanImport=False,
-                CanViewDetails=False,
-                CanViewGlobalLogs=False,
-                CanViewInformations=False,
-                CustomRoles=[role_RH_id, role_SA_id],
-                Email=eMail,
-                GravatarEmail=eMail,
-                Groups=[sec_group0],
-                HasAccessPVM=True,
-                HasAccessRDM=True,
-                HasAccessWeb=True,
-                HasAccessWebLogin=True,
-                OfflineMode='Disabled')
-
-# Create database (DVLS) user which already exist in the database - password omitted / auto-retrieved from db")
-eMail = 'new' + ''.join(random.SystemRandom().choice(string.digits)
-                        for _ in range(5)) + '@sql.com'
-DVLSTest.create_user_test(
-                DVLS_EXISTING_DB_USERS[1],
-                'SqlServer',
-                '123456',
-                email=eMail,
-                gravatarEmail=eMail,
-                HasAccessPVM=False,
-                HasAccessRDM=False,
-                HasAccessWeb=True,
-                HasAccessWebLogin=False,
-                CustomRoles=[role_SA_id, role_RH_id],
-                AllowDragAndDrop=True,
-                AllowRevealPassword=True,
-                CanExport=True,
-                CanImport=True,
-                CanViewDetails=True,
-                CanViewGlobalLogs=True,
-                CanViewInformations=True,
-                OfflineMode='ReadOnly')
-
-### Create a brand new db user (does not already exist in DB) and log in with it #
-DVLSTest.create_user_test(
-                DVLS_NEW_DB_USER,
-                'SqlServer',
-                DVLS_NEW_DB_USER_PW)
-
-DVLSTest.get_user_id_test(DVLS_NEW_DB_USER)
-
 DVLSTest.get_users_test()
-
-DVLSTest.logout_test(DVLS_ADMIN_USER)
-DVLSTest.login_test(DVLS_NEW_DB_USER, DVLS_NEW_DB_USER_PW)
-DVLSTest.logout_test(DVLS_NEW_DB_USER)
 
 DVLSTest.login_test(DVLS_ADMIN_USER, DVLS_ADMIN_PW)
 
@@ -307,7 +241,7 @@ TestLogger.info(" ")
 TestLogger.info("           # Change repository #")
 DVLSTest.change_repository_test(DVLS_NEW_REPOSITORIES[0], 1)
 
-DVLS.change_repository("Default")
+DVLS.change_repository("Default", NO_DISPLAY)
 
 TestLogger.info(" ")
 TestLogger.info("           # Delete repositories #")
@@ -408,18 +342,18 @@ DVLSTest.create_credential_test("PrivateKey", "Default Repository - Private Key 
 
 DVLSTest.create_credential_test("PrivateKey", "Private Vault - Private Key Entry", IsPrivate=True)
 
-cred_entry_result = DVLS.get_connections_by_name('Credential Entry')
+cred_entry_result = DVLS.get_connections_by_name('Credential Entry', DEFAULT_REPO_ID, NO_DISPLAY)
 cred_entry_id = ''
 if cred_entry_result.success:
     cred_entry_id = cred_entry_result.data[0]['id']
 
 private_vault_key_id = ''
-private_vault_keys_result = DVLS.get_private_vault_entries_by_name("Private Vault - Private Key Entry")
+private_vault_keys_result = DVLS.get_private_vault_entries_by_name("Private Vault - Private Key Entry", NO_DISPLAY)
 if private_vault_keys_result.success:
     private_vault_key_id = private_vault_keys_result.data[0]['id']
 
 password_template_id = ''
-password_template_result = DVLS.get_password_templates_by_name("Password Configuration Entry")
+password_template_result = DVLS.get_password_templates_by_name("Password Configuration Entry", NO_DISPLAY)
 if password_template_result.success:
     password_template_id = password_template_result.data[0]['id']
 
@@ -712,7 +646,7 @@ DVLSTest.create_private_vault_entry_test(
             UserName='Username')
 
 private_vault_entry_id = ''
-private_vault_entries_result = DVLS.get_private_vault_entries_by_name("Command Line Entry - Private")
+private_vault_entries_result = DVLS.get_private_vault_entries_by_name("Command Line Entry - Private", NO_DISPLAY)
 if private_vault_entries_result.success:
     private_vault_entry_id = private_vault_entries_result.data[0]['id']
 
@@ -731,7 +665,7 @@ DVLSTest.modify_private_vault_entry_test(
             UserName='UsernameB')
 
 private_group_entry_id = ''
-private_group_result = DVLS.get_private_vault_entries_by_name("Group Entry")
+private_group_result = DVLS.get_private_vault_entries_by_name("Group Entry", NO_DISPLAY)
 if private_group_result.success:
     private_group_entry_id = private_group_result.data[0]['id']
 
@@ -745,13 +679,13 @@ TestLogger.info(" ")
 TestLogger.info("           # Modify entries on Default repository #")
 TestLogger.info("           ----------------------------------------")
 
-DVLSTest.modify_credential_test("Default", "Credential Entry",
+DVLSTest.modify_credential_test("Default", "Credential Entry", DEFAULT_REPO_ID,
                                 UserName='UserName_B',
                                 Password='Password_B',
                                 Domain='Domain_B',
                                 MnemonicPassword='MnemonicPassword_B')
 
-RDP_Connected_Entries_result = DVLS.get_connections_by_name("RDP Configured Entry")
+RDP_Connected_Entries_result = DVLS.get_connections_by_name("RDP Configured Entry", DEFAULT_REPO_ID, NO_DISPLAY)
 RDP_Connected_id = ''
 if RDP_Connected_Entries_result.success:
     RDP_Connected_id = RDP_Connected_Entries_result.data[0].get('id')
@@ -949,7 +883,7 @@ for user_index, user in enumerate(DVLS_NEW_CUSTOM_USERS):
                                           Settings=['ReadWrite'])
 
 last_user_id = None
-last_user_id_result = DVLS.get_user_id(DVLS_NEW_CUSTOM_USERS[len(DVLS_NEW_CUSTOM_USERS) - 1])
+last_user_id_result = DVLS.get_user_id(DVLS_NEW_CUSTOM_USERS[len(DVLS_NEW_CUSTOM_USERS) - 1], NO_DISPLAY)
 if last_user_id_result.success:
     last_user_id = last_user_id_result.data
     DVLSTest.modify_user_by_id_test(last_user_id,
@@ -983,40 +917,9 @@ if last_user_id_result.success:
                                     Settings=['ReadWrite'])
 
 TestLogger.info(" ")
-TestLogger.info("           # Modify database users #")
-TestLogger.info("           ----------------------------------------")
-for user in DVLS_EXISTING_DB_USERS:
-    eMail = 'mod' + ''.join(random.SystemRandom().choice(string.digits) for _ in range(5)) + '@sqldb.com'
-    DVLSTest.modify_user_by_name_test(user,
-                                      IsAdmin=False,
-                                      IsEnabled=True,
-                                      ChangePW_NextLogon=False,
-                                      Email=eMail,
-                                      FirstName=user,
-                                      LastName=user,
-                                      CompanyName=user,
-                                      JobTitle=user,
-                                      Department=user,
-                                      GravatarEmail=eMail,
-                                      Address=user,
-                                      State=user,
-                                      CountryCode='DE',
-                                      Phone=user,
-                                      WorkPhone=user,
-                                      CellPhone=user,
-                                      Fax=user,
-                                      Access=['RDM', 'DWL', 'WEB'],
-                                      CustomRoles=[role_RH_id, role_SA_id],
-                                      Privileges=['dragDrop',
-                                          'viewUsageLogs',
-                                          'import',
-                                          'export'],
-                                      Settings=['ReadOnly'])
-
-TestLogger.info(" ")
 TestLogger.info("           # Delete user #")
 TestLogger.info("           ----------------------------------------")
-DVLSTest.delete_user_by_name_test(DVLS_NEW_DB_USER)
+
 
 DVLSTest.delete_user_by_id_test(last_user_id)
 

@@ -21,7 +21,8 @@ DVLS_ADMIN_USER = 'mainuser'
 DVLS_ADMIN_PW = '123456'
 
 DVLS_server.login(DVLS_ADMIN_USER, DVLS_ADMIN_PW)
-repo_entries_list = DVLS_server.get_repository_entries_list()
+repo_id = DVLS_server.get_repository_id("Default")
+repo_entries_list = DVLS_server.get_repository_entries_list(repo_id)
 prv_vlt_entries_list = DVLS_server.get_private_vault_entries_list()
 repo_and_prv_vlt_entries_list = repo_entries_list.data + prv_vlt_entries_list.data
 DVLS_server.logout(DVLS_ADMIN_USER)

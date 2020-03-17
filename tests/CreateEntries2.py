@@ -6,10 +6,10 @@ from dvlssdk.generated.enums.CommandLineCaptureOutputMode import CommandLineCapt
 from dvlssdk.generated.enums.CommandLineExecutionMode import CommandLineExecutionMode
 
 # Constants
-DVLS_URI = 'http://127.0.0.1/NV2'
+DVLS_URI = 'http://127.0.0.1/dvls'
 # DVLS_URI = 'http://10.1.20.54/dps'
 DVLS = DVLSConnection(DVLS_URI, errorLevelLog='INFO')
-DVLS_ADMIN_USER = 'secondAdmin'
+DVLS_ADMIN_USER = 'mainuser'
 DVLS_ADMIN_PW = '123456'
 
 ST_ENTRIES = DVLS.STANDARD_ENTRY_TYPES
@@ -63,8 +63,8 @@ for i in range(1000):
         RunAsUsername='Username')
 '''
 
-DVLS.create_repository("Repo4")
-DVLS.change_repository("Repo4")
+DVLS.create_repository("Repo7")
+DVLS.change_repository("Repo7")
 for i in range(10000):
     DVLS.create_connection(
         ConnectionType.CommandLine,
@@ -97,41 +97,5 @@ for i in range(10000):
         RunAsPassword='Password',
         RunAsPromptForCredentials=True,
         RunAsUsername='Username',
-        UserName='Username: $HOST$')
+        UserName='Username')
 
-DVLS.create_repository("Repo5")
-DVLS.change_repository("Repo5")
-
-for i in range(10000):
-    DVLS.create_connection(
-        ConnectionType.CommandLine,
-        "Command Line Entry second " + str(i),
-        CaptureOutputMode=CommandLineCaptureOutputMode.File.value,
-        CaptureOutputFilePath='CapOutFilePath',
-        CommandLine='CommandLineRun',
-        CommandLineWaitForApplicationToExit=True,
-        CredentialSource='Custom',
-        CredentialConnectionId='CredConId',
-        CredentialConnectionID='CredConID',
-        Description='Description',
-        Domain='Domain',
-        EmbeddedWaitTime=500,
-        ExecutionMode=CommandLineExecutionMode.Capture.value,
-        Expiration=str(datetime.datetime.now()
-                       + datetime.timedelta(1)),
-        Group='Import',
-        Host='Host',
-        Keywords='Tag1 Tag2',
-        NetOnly=True,
-        Parameter1DataType='Secured',
-        Parameter1DefaultValue='P1Default',
-        Parameter1Label='P1Label',
-        Password='Password',
-        ProcessName='CommandLineRun',
-        Run64BitsMode=True,
-        RunAsAdministrator=True,
-        RunAsDomain='Domain',
-        RunAsPassword='Password',
-        RunAsPromptForCredentials=True,
-        RunAsUsername='Username',
-        UserName='Username: $HOST$')

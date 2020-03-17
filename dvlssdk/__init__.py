@@ -1236,21 +1236,24 @@ class DVLSConnection:
                                    "aborting creation of connection entry " + name, verbose_override)
         return result
 
-    def get_connections_by_name(self, name, verbose_override=None):
+    def get_connections_by_name(self, name, repository_id, verbose_override=None):
         """
-        Gets all connections that have the given name in current repository
+        Gets all connections that have the given name in repository
 
+        :param repository_id: Id of the repository to get connections from
         :param name: Name of the connections you want to get
         :param verbose_override: If provided will override the verbose setting of ApiManager
         :return: SDKResult{'data': PartialConnection[] (as dictionary)}
         """
         result = SDKResult()
         if self._api.is_logged_on():
-            rep_result = self.get_repository_entries_list(verbose_override)
+            rep_result = self.get_repository_entries_list(repository_id, verbose_override)
             if rep_result.success:
                 entries = rep_result.data
                 entries = DVLSConnection._extract_entries_with_name(name, entries)
                 result.data = []
+                if len(entries) <= 0:
+                    result.result = 0
                 for entry in entries:
                     full_entry_result = self.get_connection_by_id(entry.get('id'), verbose_override)
                     if full_entry_result.success:
@@ -1488,17 +1491,18 @@ class DVLSConnection:
                                    "aborting creation of credential entry " + name, verbose_override)
         return result
 
-    def get_credential_entries_by_name(self, name, verbose_override=None):
+    def get_credential_entries_by_name(self, name, repository_id, verbose_override=None):
         """
-        Gets all credential entries that have the given name in current repository
+        Gets all credential entries that have the given name in repository
 
+        :param repository_id: Id of the repository to get entries from
         :param name: Name of the credential entries you want to get
         :param verbose_override: If provided will override the verbose setting of ApiManager
         :return: SDKResult{'data': PartialConnection[] (as dictionary)}
         """
         result = SDKResult()
         if self._api.is_logged_on():
-            rep_result = self.get_repository_entries_tree(verbose_override)
+            rep_result = self.get_repository_entries_tree(repository_id, verbose_override)
             if rep_result.success:
                 entries = rep_result.data
                 filtered_entries = DVLSConnection._extract_entries_with_name(name, entries)
@@ -1876,16 +1880,17 @@ class DVLSConnection:
                                    "aborting changing repository to " + name, verbose_override)
         return result
 
-    def get_repository_entries_tree(self, verbose_override=None):
+    def get_repository_entries_tree(self, repository_id, verbose_override=None):
         """
-        Get tree structure of all entries of current repository
+        Get tree structure of all entries of repository
 
+        :param repository_id: Id of the repository to get entries from
         :param verbose_override: If provided will override the verbose setting of ApiManager
         :return: SDKResult{'data': PartialConnection (as dictionary)}
         """
         result = SDKResult()
         if self._api.is_logged_on():
-            result= self._api.get_active_repository_entries(verbose_override)
+            result= self._api.get_active_repository_entries(repository_id, verbose_override)
             if result.success:
                 self.dvls_logger.info("[DvlsSDK.get_repository_entries_tree] - Successful", verbose_override)
             else:
@@ -1895,14 +1900,15 @@ class DVLSConnection:
                                    "aborting get current repository entries tree", verbose_override)
         return result
 
-    def get_repository_entries_list(self, verbose_override=None):
+    def get_repository_entries_list(self, repository_id, verbose_override=None):
         """
-        Get list of all entries of current repository
+        Get list of all entries of repository
 
+        :param repository_id: Id of the repository to get entries from
         :param verbose_override: If provided will override the verbose setting of ApiManager
         :return: SDKResult{'data': PartialConnection[] (as dictionary)}
         """
-        result = self.get_repository_entries_tree(verbose_override)
+        result = self.get_repository_entries_tree(repository_id, verbose_override)
         if result.success:
             entries = result.data
             entries = self._get_entries_list(entries)
@@ -1932,7 +1938,7 @@ class DVLSConnection:
                 repositories = repositories_result.data
                 for repo in repositories:
                     if repo['name'] == name:
-                        result.data = repo['id']
+                        result.data = repo['idString']
                         break
                 if result.success:
                     self.dvls_logger.info("[DvlsSDK.get_repository_id] - Successful for " + name, verbose_override)

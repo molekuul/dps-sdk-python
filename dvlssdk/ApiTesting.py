@@ -20,91 +20,91 @@ class ApiTesting:
         self.action_types = ApiTesting.ActionTypes
 
     def login_test(self, user, password):
-        result = self.DVLS.login(user, password)
+        result = self.DVLS.login(user, password, False)
         self.test("Login:", self.ActionTypes.GET, user, result)
 
     def logout_test(self, user):
-        result = self.DVLS.logout(user)
+        result = self.DVLS.logout(user, False)
         self.test("Logout:", self.ActionTypes.GET, user,result)
 
     def create_role_test(self, name, **options):
         server_data = None
-        response = self.DVLS.create_role(name, **options)
+        response = self.DVLS.create_role(name, **{**options, 'verbose_override': False})
         if response.success:
-            server_data = self.DVLS.get_role_by_name(name)
+            server_data = self.DVLS.get_role_by_name(name, False)
         options["Name"] = name
         self._test_with_validation("Create role", self.ActionTypes.CREATE, response, options, server_data)
 
     def modify_role_by_name_test(self, name, **options):
-        server_existing_result = self.DVLS.get_role_by_name(name)
+        server_existing_result = self.DVLS.get_role_by_name(name, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_entry = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_entry, options)
-            response = self.DVLS.modify_role_by_name(name, **options)
+            response = self.DVLS.modify_role_by_name(name, **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         return self._test_with_validation("Modify role by name", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def modify_role_by_id_test(self, role_id, **options):
-        server_existing_result = self.DVLS.get_role_by_id(role_id)
+        server_existing_result = self.DVLS.get_role_by_id(role_id, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_entry = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_entry, options)
-            response = self.DVLS.modify_role_by_id(role_id, **options)
+            response = self.DVLS.modify_role_by_id(role_id, **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         return self._test_with_validation("Modify role by id", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def delete_role_by_id_test(self, role_id):
         test_result = False
-        response = self.DVLS.delete_role_by_id(role_id)
+        response = self.DVLS.delete_role_by_id(role_id, False)
         if response.success:
-            get_result = self.DVLS.get_role_by_id(role_id)
+            get_result = self.DVLS.get_role_by_id(role_id, False)
             if not get_result.success:
                 test_result = True
         self.process_test_result(test_result, "Delete role by id", role_id)
 
     def create_security_group_test(self, name, **options):
         server_data = None
-        response = self.DVLS.create_security_group(name, **options)
+        response = self.DVLS.create_security_group(name, **{**options, 'verbose_override': False})
         if response.success:
             if not response.data is None:
                 security_group = response.data
                 security_group_id = security_group.get('id')
-                result = self.DVLS.get_security_group_by_id(security_group_id)
+                result = self.DVLS.get_security_group_by_id(security_group_id, False)
                 if result.success:
                     server_data = result.data
         options["Name"] = name
         self._test_with_validation("Create security group", self.ActionTypes.CREATE, response, options, server_data)
 
     def modify_security_group_test(self, name, **options):
-        server_existing_result = self.DVLS.get_security_group_by_name(name)
+        server_existing_result = self.DVLS.get_security_group_by_name(name, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_entry = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_entry, options)
-            response = self.DVLS.modify_security_group_by_name(name, **options)
+            response = self.DVLS.modify_security_group_by_name(name, **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         return self._test_with_validation("Modify security group", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def get_security_group_tree_test(self, expected_sec_groups):
         server_sec_groups = None
-        response = self.DVLS.get_security_group_tree()
+        response = self.DVLS.get_security_group_tree(False)
         if response.success:
             server_sec_groups = len(response.data)
         self._test_with_validation("Get security group tree", self.ActionTypes.GET, response, server_sec_groups, expected_sec_groups)
 
     def create_user_test(self, name, user_type,  password, **options):
-        response = self.DVLS.create_user(user_type, name, password, **options)
+        response = self.DVLS.create_user(user_type, name, password, **{**options, 'verbose_override': False})
         options["Name"] = name
         options["Password"] = password
         created_user = response.data
@@ -112,52 +112,52 @@ class ApiTesting:
             self.total_users += 1
 
     def modify_user_by_name_test(self, name, **options):
-        server_existing_result = self.DVLS.get_user_by_name(name)
+        server_existing_result = self.DVLS.get_user_by_name(name, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_entry = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_entry, options)
-            response = self.DVLS.modify_user_by_name(name, **options)
+            response = self.DVLS.modify_user_by_name(name, **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         return self._test_with_validation("Modify user by name", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def modify_user_by_id_test(self, user_id, **options):
-        server_existing_result = self.DVLS.get_user_by_id(user_id)
+        server_existing_result = self.DVLS.get_user_by_id(user_id, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_entry = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_entry, options)
-            response = self.DVLS.modify_user_by_id(user_id, **final_dict)
+            response = self.DVLS.modify_user_by_id(user_id, **{**final_dict, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         return self._test_with_validation("Modify user by id", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def delete_user_by_name_test(self, name):
         test_result = False
-        response = self.DVLS.delete_user_by_name(name)
+        response = self.DVLS.delete_user_by_name(name, False)
         if response.success:
-            get_result = self.DVLS.get_user_by_name(name)
+            get_result = self.DVLS.get_user_by_name(name, False)
             if not get_result.success:
                 test_result = True
         self.process_test_result(test_result, "Delete user by name", name)
 
     def delete_user_by_id_test(self, user_id):
         test_result = False
-        response = self.DVLS.delete_user_by_id(user_id)
+        response = self.DVLS.delete_user_by_id(user_id, False)
         if response.success:
-            get_result = self.DVLS.get_user_by_id(user_id)
+            get_result = self.DVLS.get_user_by_id(user_id, False)
             if not get_result.success:
                 test_result = True
         self.process_test_result(test_result, "Delete user by id", user_id)
 
     def create_connection_test(self, name, connection_type, **options):
         created_connection = None
-        response = self.DVLS.create_connection(connection_type, name, **options)
+        response = self.DVLS.create_connection(connection_type, name, **{**options, 'verbose_override': False})
         if response.success:
             options["Name"] = name
             if isinstance(connection_type, str) and connection_type in self.STANDARD_ENTRY_TYPES:
@@ -170,16 +170,16 @@ class ApiTesting:
 
     def delete_connection_by_id_test(self, connection_id):
         test_result = False
-        response = self.DVLS.delete_connection_by_id(connection_id)
+        response = self.DVLS.delete_connection_by_id(connection_id, False)
         if response.success:
-            get_result = self.DVLS.get_connection_by_id(connection_id)
+            get_result = self.DVLS.get_connection_by_id(connection_id, False)
             if (get_result.success and get_result.data == {}) or not get_result.success:
                 test_result = True
         self.process_test_result(test_result, "Delete connection", connection_id)
 
     def create_credential_test(self, credential_type, name, **options):
         created_credential = None
-        response = self.DVLS.create_credential_entry(credential_type, name, **options)
+        response = self.DVLS.create_credential_entry(credential_type, name, **{**options, 'verbose_override': False})
         options["Name"] = name
         if isinstance(credential_type, str) and credential_type in CREDENTIAL_ENTRY_TYPES:
             type_id = CredentialResolverConnectionType.value_from_name(credential_type)
@@ -190,62 +190,62 @@ class ApiTesting:
             created_credential = response.data
         self._test_with_validation("Create credential entry", self.ActionTypes.CREATE, response, options, created_credential)
 
-    def modify_credential_test(self, entry_type, name, **options):
-        server_existing_result = self.DVLS.get_credential_entries_by_name(name)
+    def modify_credential_test(self, entry_type, name, repository_id, **options):
+        server_existing_result = self.DVLS.get_credential_entries_by_name(name, repository_id, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_cred = server_existing_result.data[0]
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_cred, options)
-            response = self.DVLS.modify_credential_entry(entry_type, server_existing_cred.get('id'), **options)
+            response = self.DVLS.modify_credential_entry(entry_type, server_existing_cred.get('id'), **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         self._test_with_validation("Modify credential entry", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def delete_credential_by_id_test(self, credential_id):
         test_result = False
-        response = self.DVLS.delete_credential_entry_by_id(credential_id)
+        response = self.DVLS.delete_credential_entry_by_id(credential_id, False)
         if response.success:
-            get_result = self.DVLS.get_credential_entry_by_id(credential_id)
+            get_result = self.DVLS.get_credential_entry_by_id(credential_id, False)
             if (get_result.success and get_result.data == {}) or not get_result.success:
                 test_result = True
         self.process_test_result(test_result, "Delete credential entry", credential_id)
 
     def modify_connection_test(self, entry_type, connection_id, **options):
-        server_existing_result = self.DVLS.get_connection_by_id(connection_id)
+        server_existing_result = self.DVLS.get_connection_by_id(connection_id, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_conn = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_conn, options)
-            response = self.DVLS.modify_connection_by_id(entry_type, connection_id, **options)
+            response = self.DVLS.modify_connection_by_id(entry_type, connection_id, **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         self._test_with_validation("Modify connection", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def modify_features_test(self, **options):
-        server_existing_result = self.DVLS.get_features()
+        server_existing_result = self.DVLS.get_features(False)
         original_entry = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_features = server_existing_result.data
             original_entry = self.DVLS.object_to_flatten_dict(server_existing_features, options)
-            response = self.DVLS.modify_features(**options)
+            response = self.DVLS.modify_features(**{**options, 'verbose_override': False})
             if response.success:
-                modified_entry_result = self.DVLS.get_features()
+                modified_entry_result = self.DVLS.get_features(False)
                 features_configuration_entity = init_model('generated', 'FeaturesConfigurationEntity')
                 modified_entry = fill_data(features_configuration_entity, modified_entry_result.data)
         self._test_with_validation("Modify features", self.ActionTypes.MODIFY, response, original_entry, modified_entry)
 
     def create_password_template_test(self, mode, name, **options):
         server_template = None
-        response = self.DVLS.create_password_template(mode, name, **options)
+        response = self.DVLS.create_password_template(mode, name, **{**options, 'verbose_override': False})
         if response.success:
             pw_id = response.data
-            server_template_result = self.DVLS.get_password_template_by_id(pw_id)
+            server_template_result = self.DVLS.get_password_template_by_id(pw_id, False)
             if server_template_result.success:
                 server_template = server_template_result.data
         options["Name"] = name
@@ -253,25 +253,25 @@ class ApiTesting:
         self._test_with_validation("Create password template", self.ActionTypes.CREATE, response, options, server_template)
 
     def modify_password_template_test(self, template_id, **options):
-        server_existing_result = self.DVLS.get_password_template_by_id(template_id)
+        server_existing_result = self.DVLS.get_password_template_by_id(template_id, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_template = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_template, options)
-            response = self.DVLS.modify_password_template(template_id, **options)
+            response = self.DVLS.modify_password_template(template_id, **{**options, 'verbose_override': False})
             if response.success:
-                modified_entry_result = self.DVLS.get_password_template_by_id(template_id)
+                modified_entry_result = self.DVLS.get_password_template_by_id(template_id, False)
                 if modified_entry_result.success:
                     modified_entry = modified_entry_result.data
         self._test_with_validation("Modify password template", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def delete_password_template_by_id_test(self, template_id):
         test_result = False
-        response = self.DVLS.delete_password_template_by_id(template_id)
+        response = self.DVLS.delete_password_template_by_id(template_id, False)
         if response.success:
-            get_result = self.DVLS.get_password_template_by_id(template_id)
+            get_result = self.DVLS.get_password_template_by_id(template_id, False)
             if get_result.success:
                 if get_result.data == {}:
                     test_result = True
@@ -280,10 +280,10 @@ class ApiTesting:
     def get_user_id_test(self, username):
         server_user_id = None
         expected_user_id = None
-        response = self.DVLS.get_user_id(username)
+        response = self.DVLS.get_user_id(username, False)
         if response.success:
             server_user_id = response.data
-            server_user_response = self.DVLS.get_user_by_name(username)
+            server_user_response = self.DVLS.get_user_by_name(username, False)
             if server_user_response.success:
                 user = server_user_response.data
                 expected_user_id = user.get("key")
@@ -292,14 +292,14 @@ class ApiTesting:
     def get_users_test(self):
         server_users = None
         expected_users = self.total_users
-        response = self.DVLS.get_users()
+        response = self.DVLS.get_users(False)
         if response.success:
             server_users = len(response.data)
         self._test_with_validation("Get users", self.ActionTypes.GET, response, server_users, expected_users)
 
     def get_sensitive_data_test(self, connection_id, expected_sensitive_data):
         sensitive_data = None
-        sensitive_data_result = self.DVLS.get_connection_sensitive_data(connection_id)
+        sensitive_data_result = self.DVLS.get_connection_sensitive_data(connection_id, False)
         if sensitive_data_result.success:
             sensitive_data = sensitive_data_result.data
         else:
@@ -308,16 +308,16 @@ class ApiTesting:
 
     def get_password_test(self, connection_id, expected_password):
         password = None
-        password_result = self.DVLS.get_connection_password(connection_id)
+        password_result = self.DVLS.get_connection_password(connection_id, False)
         if password_result.success:
             password = password_result.data
         self._test_with_validation("Get password", self.ActionTypes.GET, password_result, password, expected_password)
 
     def create_repository_test(self, repo_name, **options):
         creation_result = False
-        repo_result = self.DVLS.create_repository(repo_name, **options)
+        repo_result = self.DVLS.create_repository(repo_name, **{**options, 'verbose_override': False})
         if repo_result.success:
-            get_result = self.DVLS.get_repository_id(repo_name)
+            get_result = self.DVLS.get_repository_id(repo_name, False)
             if get_result.success:
                 if not get_result.data is None:
                     creation_result = True
@@ -325,9 +325,9 @@ class ApiTesting:
 
     def delete_repository_test(self, repo_name):
         delete_result = False
-        repo_result = self.DVLS.delete_repository_by_name(repo_name)
+        repo_result = self.DVLS.delete_repository_by_name(repo_name, False)
         if repo_result.success:
-            get_result = self.DVLS.get_repository_id(repo_name)
+            get_result = self.DVLS.get_repository_id(repo_name, False)
             if not get_result.success:
                 if get_result.data is None:
                     delete_result = True
@@ -335,9 +335,10 @@ class ApiTesting:
 
     def change_repository_test(self, repo_name, expected_entries):
         test_result = False
-        change_result = self.DVLS.change_repository(repo_name)
+        change_result = self.DVLS.change_repository(repo_name, False)
+        repo_result = self.DVLS.get_repository_id(repo_name, False)
         if change_result.success:
-            entries_result = self.DVLS.get_repository_entries_list()
+            entries_result = self.DVLS.get_repository_entries_list(repo_result.data, False)
             if entries_result.success:
                 server_entries = len(entries_result.data)
                 if expected_entries == server_entries:
@@ -346,32 +347,32 @@ class ApiTesting:
 
     def create_private_vault_entry_test(self, name, entry_type, **options):
         creation_result = False
-        entry_result = self.DVLS.create_private_vault_entry(entry_type, name, **options)
+        entry_result = self.DVLS.create_private_vault_entry(entry_type, name, **{**options, 'verbose_override': False})
         if entry_result.success:
-            get_result = self.DVLS.get_private_vault_entries_by_name(name)
+            get_result = self.DVLS.get_private_vault_entries_by_name(name, False)
             if get_result.success:
                 if len(get_result.data) == 1:
                     creation_result = True
         self.process_test_result(creation_result, "Create private vault entry", name)
 
     def modify_private_vault_entry_test(self, entry_type, entry_id, **options):
-        server_existing_result = self.DVLS.get_private_vault_entry_by_id(entry_id)
+        server_existing_result = self.DVLS.get_private_vault_entry_by_id(entry_id, False)
         final_dict = None
         modified_entry = None
         response = None
         if server_existing_result.success:
             server_existing_conn = server_existing_result.data
             final_dict = self.DVLS.object_to_flatten_dict(server_existing_conn, options)
-            response = self.DVLS.modify_private_vault_entry_by_id(entry_type, entry_id, **options)
+            response = self.DVLS.modify_private_vault_entry_by_id(entry_type, entry_id, **{**options, 'verbose_override': False})
             if response.success:
                 modified_entry = response.data
         self._test_with_validation("Modify private vault entry", self.ActionTypes.MODIFY, response, final_dict, modified_entry)
 
     def delete_private_vault_entry_test(self, entry_id):
         delete_result = False
-        repo_result = self.DVLS.delete_private_vault_entry_by_id(entry_id)
+        repo_result = self.DVLS.delete_private_vault_entry_by_id(entry_id, False)
         if repo_result.success:
-            get_result = self.DVLS.get_private_vault_entry_by_id(entry_id)
+            get_result = self.DVLS.get_private_vault_entry_by_id(entry_id, False)
             if not get_result.success:
                 if get_result.data is None:
                     delete_result = True
@@ -379,7 +380,7 @@ class ApiTesting:
 
     def get_private_vault_list_test(self, expected_entries):
         server_entries = None
-        response = self.DVLS.get_private_vault_entries_list()
+        response = self.DVLS.get_private_vault_entries_list(False)
         if response.success:
             server_entries = len(response.data)
         self._test_with_validation("Get private vault entries list", self.ActionTypes.GET, response, server_entries, expected_entries)

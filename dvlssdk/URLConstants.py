@@ -10,7 +10,7 @@ class UrlResolver(object):
     DELETE_SECURITY_GROUP = Template('$dvls_uri/api/security/groupinfo/delete/$id')
     DELETE_USER = Template('$dvls_uri/api/security/userinfo/delete/$id')
     DELETE_PRIVATE_ENTRY = Template('$dvls_uri/api/connections/partial/$id')
-    ENTRIES_TREE = Template('$dvls_uri/api/connections/partial/tree')
+    ENTRIES_TREE = Template('$dvls_uri/api/connections/partial/tree/$id')
     GET_PASSWORD = Template('$dvls_uri/api/connections/partial/$id/sensitive-data')
     LOGIN = Template('$dvls_uri/api/login')
     LOGOUT = Template('$dvls_uri/api/logout')
@@ -57,8 +57,8 @@ class UrlResolver(object):
     def delete_private_entry_url(self, entry_id):
         return self.DELETE_PRIVATE_ENTRY.substitute(dvls_uri=self.dvls_uri, id=entry_id)
 
-    def entries_tree_url(self):
-        return self.ENTRIES_TREE.substitute(dvls_uri=self.dvls_uri)
+    def entries_tree_url(self, repository_id):
+        return self.ENTRIES_TREE.substitute(dvls_uri=self.dvls_uri, id=repository_id)
 
     def get_password_url(self, user_id):
         return self.GET_PASSWORD.substitute(dvls_uri=self.dvls_uri, id=user_id)
