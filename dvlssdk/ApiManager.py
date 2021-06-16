@@ -205,7 +205,7 @@ class ApiManager(object):
         return SDKResult(web_request.json())
 
     def get_sensitive_data(self, connection_id, verbose_override=None):
-        web_request = self._do_api_get(self.url_resolver.get_sensitive_data(connection_id))
+        web_request = self._do_api_post(self.url_resolver.get_sensitive_data(connection_id))
         result = SDKResult(web_request.json())
         if result.success:
             data = self.EncryptionManager.aes_decrypt(result.data).decode('utf-8')
@@ -229,6 +229,9 @@ class ApiManager(object):
         return SDKResult(web_request.json())
 
     def _do_api_get(self, uri):
+        return requests.get(uri, headers=self.DvlsRequestHeaders)
+
+    def _do_api_post(self, uri):
         return requests.get(uri, headers=self.DvlsRequestHeaders)
 
     def _do_api_post_json(self, uri, body):
