@@ -232,7 +232,7 @@ class ApiManager(object):
         return requests.get(uri, headers=self.DvlsRequestHeaders)
 
     def _do_api_post(self, uri):
-        return requests.get(uri, headers=self.DvlsRequestHeaders)
+        return requests.post(uri, headers=self.DvlsRequestHeaders)
 
     def _do_api_post_json(self, uri, body):
         hdrs = self.DvlsRequestHeaders
